@@ -5,8 +5,13 @@ import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.black.taxi.constants.Constant;
 import com.black.taxi.network.HttpClient;
 
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -14,11 +19,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class RegistrationActivity extends BaseActivity {
+public class RegistrationActivity extends BaseActivity implements LocationListener {
 
 	public static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 	private EditText et_email, et_phone, et_forename, et_surname, et_password, et_confirm_password;
 	private Button btn_register;
+	private LocationManager lm;
+	private double latitude,longitude;
+	public boolean isFirstTime = true;
 
 	@Override
 	protected void onCreate(Bundle arg0) {
@@ -33,18 +41,26 @@ public class RegistrationActivity extends BaseActivity {
 
 		btn_register = (Button) findViewById(R.id.btn_register);
 		btn_register.setOnClickListener(this);
+		
+		if(isConnectingToInternet()){
+			lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+			lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0000,000, this);
+		}
 	}
-
+	
 	public boolean isvalid() {
 		boolean flag = true;
 		if (et_email.getText().toString().trim().length() == 0) {
 			et_email.setError("Pleaswe enter email");
 			flag = false;
-		} else if (isvalidMailid(et_phone.getText().toString().trim())) {
-			et_phone.setError("In valid email id");
+		} else if (!isvalidMailid(et_email.getText().toString().trim())) {
+			et_email.setError("In valid email id");
 			flag = false;
-		} else if (et_phone.getText().toString().trim().length() == 0) {
+		}else if (et_phone.getText().toString().trim().length() == 0) {
 			et_phone.setError("Pleaswe enter phone");
+			flag = false;
+		} else if (!(et_phone.getText().toString().trim().length() >=10)) {
+			et_phone.setError("In valid phone number");
 			flag = false;
 		} else if (et_phone.getText().toString().trim().length() == 0) {
 			et_phone.setError("Pleaswe enter phone");
@@ -58,10 +74,13 @@ public class RegistrationActivity extends BaseActivity {
 		} else if (et_password.getText().toString().trim().length() == 0) {
 			et_password.setError("Pleaswe enter password");
 			flag = false;
+		} else if (et_password.getText().toString().trim().length() < 6) {
+			et_password.setError("Password must br atleast 6 digit");
+			flag = false;
 		} else if (et_confirm_password.getText().toString().trim().length() == 0) {
 			et_confirm_password.setError("Pleaswe enter password");
 			flag = false;
-		} else if (et_confirm_password.getText().toString().trim().equalsIgnoreCase(et_password.getText().toString().trim())) {
+		} else if (!et_confirm_password.getText().toString().trim().equalsIgnoreCase(et_password.getText().toString().trim())) {
 			Toast.makeText(RegistrationActivity.this, "Password mismatch...", Toast.LENGTH_LONG).show();
 			flag = false;
 		}
@@ -85,6 +104,7 @@ public class RegistrationActivity extends BaseActivity {
 
 	public class SendUserRegDataToserver extends AsyncTask<Void, Void, Boolean> {
 
+		String message = "";
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -101,10 +121,15 @@ public class RegistrationActivity extends BaseActivity {
 				obj.put("forename", et_forename.getText().toString().trim());
 				obj.put("surname", et_surname.getText().toString().trim());
 				obj.put("password", et_password.getText().toString().trim());
+				obj.put("latitude", ""+latitude);
+				obj.put("longitude", ""+longitude);
 				
-				String response = HttpClient.SendHttpPost("", obj.toString());
+				String response = HttpClient.SendHttpPost(Constant.REGISTRATION, obj.toString());
 				if(response != null){
 					JSONObject ob = new JSONObject(response);
+					if(ob.has("message")){
+						message = ob.getString("message");
+					}
 					return ob.getBoolean("status");
 				}
 			} catch (JSONException e) {
@@ -121,8 +146,42 @@ public class RegistrationActivity extends BaseActivity {
 				Toast.makeText(RegistrationActivity.this, "You have successfully registered..", Toast.LENGTH_LONG).show();
 				finish();
 			}else{
-				Toast.makeText(RegistrationActivity.this, "Error occured ..please try again", Toast.LENGTH_LONG).show();
+				if(message.length()>0){
+					Toast.makeText(RegistrationActivity.this, message, Toast.LENGTH_LONG).show();
+				}else{
+					Toast.makeText(RegistrationActivity.this, "Error occured ..please try again", Toast.LENGTH_LONG).show();
+				}
 			}
 		}
+	}
+
+	@Override
+	public void onLocationChanged(Location location) {
+		if (isFirstTime) {
+			latitude = location.getLatitude();
+			longitude = location.getLongitude();
+			isFirstTime = false;
+		}
+	}
+
+	@Override
+	public void onProviderDisabled(String arg0) {
+		
+	}
+
+	@Override
+	public void onProviderEnabled(String arg0) {
+	
+	}
+
+	@Override
+	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
+		
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		lm.removeUpdates(this);
 	}
 }

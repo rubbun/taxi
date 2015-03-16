@@ -3,6 +3,7 @@ package com.black.taxi;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.black.taxi.constants.Constant;
 import com.black.taxi.network.HttpClient;
 
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class LoginActivity extends BaseActivity {
 	
@@ -74,10 +76,21 @@ public class LoginActivity extends BaseActivity {
 				obj.put("email", et_email.getText().toString().trim());
 				obj.put("password", et_password.getText().toString().trim());
 			
-				String response = HttpClient.SendHttpPost("", obj.toString());
+				String response = HttpClient.SendHttpPost(Constant.LOGIN, obj.toString());
 				if(response != null){
 					JSONObject ob = new JSONObject(response);
-					return ob.getBoolean("status");
+					if(ob.getBoolean("status")){
+						app.getUserInfo().setValues(true,
+								ob.getString("userID"),
+								et_email.getText().toString().trim(),
+								ob.getString("phone"),
+								ob.getString("forename"),
+								ob.getString("surname"));
+						
+						return true;
+					}else{
+						return false;
+					}
 				}
 			
 			} catch (JSONException e) {
@@ -91,7 +104,11 @@ public class LoginActivity extends BaseActivity {
 			super.onPostExecute(result);
 			doRemoveLoading();
 			if(result){
-				
+				Intent i = new Intent(LoginActivity.this,DashBoard.class);
+				startActivity(i);
+				finish();
+			}else{
+				Toast.makeText(LoginActivity.this, "Invalid userid or password", Toast.LENGTH_LONG).show();
 			}
 		}
 	}

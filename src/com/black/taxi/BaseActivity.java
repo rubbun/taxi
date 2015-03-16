@@ -13,6 +13,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.black.taxi.app.MyApplication;
+import com.black.taxi.app.UserInfo;
 
 public class BaseActivity extends FragmentActivity implements OnClickListener {
 
@@ -29,6 +30,7 @@ public class BaseActivity extends FragmentActivity implements OnClickListener {
 		width = metrics.widthPixels;
 		height = metrics.heightPixels;
 
+		app.setUserInfo(new UserInfo(BaseActivity.this));
 	}
 
 	@Override
@@ -65,9 +67,7 @@ public class BaseActivity extends FragmentActivity implements OnClickListener {
 					if (info[i].getState() == NetworkInfo.State.CONNECTED) {
 						return true;
 					}
-
 		}
 		return false;
 	}
-
 }

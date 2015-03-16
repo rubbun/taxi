@@ -9,17 +9,21 @@
         android:minSdkVersion="14"
         android:targetSdkVersion="19"
         tools:ignore="OldTargetApi" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:name="com.black.taxi.app.MyApplication"
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/logo"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Holo.Light.NoActionBar" >
         <activity
             android:name=".SplashView"
-            android:label="@string/app_name" 
-            android:screenOrientation="portrait">
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -34,6 +38,9 @@
             android:name=".LoginActivity"
             android:screenOrientation="portrait" >
         </activity>
+        <activity
+            android:name=".DashBoard"
+            android:screenOrientation="portrait" >
+        </activity>
     </application>
-
 </manifest>

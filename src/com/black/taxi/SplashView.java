@@ -10,7 +10,19 @@ public class SplashView extends BaseActivity {
 	protected void onCreate(Bundle arg0) {
 		super.onCreate(arg0);
 		setContentView(R.layout.activity_splash);
-		stall();
+		
+	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		if(app.getUserInfo().isLogin()){
+			Intent i = new Intent(SplashView.this,DashBoard.class);
+			startActivity(i);
+			finish();
+		}else{
+			stall();
+		}
 	}
 
 	public void stall() {
