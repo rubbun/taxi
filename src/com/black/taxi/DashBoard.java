@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class DashBoard extends BaseActivity {
 	private TextView tv_user_name;
@@ -44,7 +45,8 @@ public class DashBoard extends BaseActivity {
 			break;
 			
 		case R.id.iv_find_taxi:
-			
+			Intent i1 = new Intent(DashBoard.this,FindtaxiActivity.class);
+			startActivity(i1);
 			break;
 		}
 	}
